@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "403093956874",
+    "project_id": "nool-e4a78",
+    "storage_bucket": "nool-e4a78.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:403093956874:android:8377338fd40fd4cad9b2f3",
+        "android_client_info": {
+          "package_name": "com.example.nool"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "403093956874-3ejan0l5soaf052s36f9l4m7pvvp694h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyArj1RYqjjtaHmmf9qbloMseRnAGLojWOc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "403093956874-3ejan0l5soaf052s36f9l4m7pvvp694h.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "403093956874-64q0t1d0jk0aajnnjsmsej2i090lnt1j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nitrocomputersolutions.nool"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
