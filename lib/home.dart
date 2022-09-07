@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nool/model/student.dart';
+import 'package:nool/student_card.dart';
+import 'package:nool/student_detail.dart';
 import 'package:nool/utils/log.dart';
 import 'package:nool/utils/text.dart';
 
@@ -120,61 +122,15 @@ class _NoolHomeState extends State<NoolHome> {
   }
 
   Widget buildStudent(Student s) {
-    Widget titleRow = Text("${s.studentFirstName} ${s.studentLastName}",
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
-
-    Widget row2 = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          TEXT.nameValue("age", "${s.age}yrs"),
-          TEXT.nameValue("grade", s.gradeName),
-          TEXT.nameValue("sec", s.sectionName),
-          TEXT.nameValue("room", s.roomNo),
-          TEXT.nameValue("ID", s.studentID),
-        ]);
-
-    Widget parentRow = Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          TEXT.nameValueRow("parent-1", s.parent1Name),
-          TEXT.nameValueRow("parent-2", s.parent2Name),
-          TEXT.nameValueRow(" email id", s.parentEmailId),
-        ]);
-
-    Widget statusRow = Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          TEXT.statusImage(s.status),
-        ]);
-
-    return Card(
-        margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
-        elevation: 5.0,
-        child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: titleRow),
-              Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: row2),
-              Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: parentRow),
-              Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
-                  child: statusRow)
-            ]));
+    return GestureDetector(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      StudentDetail(student: s)));
+        },
+        child: StudentCard(student: s));
   }
 
   Widget buildList() {
@@ -192,7 +148,7 @@ class _NoolHomeState extends State<NoolHome> {
         appBar: AppBar(
           title: const Text("நூல் விநியோகம்",
               style: TextStyle(
-                  fontSize: 30,
+                  fontSize: 20,
                   fontWeight: FontWeight.bold,
                   fontFamily: "Catamaran-VariableFont_wght",
                   color: Colors.white)),
