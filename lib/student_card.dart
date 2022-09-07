@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nool/model/nool_status.dart';
 import 'package:nool/model/student.dart';
 import 'package:nool/utils/text.dart';
 
@@ -41,10 +42,12 @@ class StudentCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          TEXT.statusImage(s.status),
+          Text(s.status),
+          const SizedBox(width: 5),
+          NoolStatus.statusIcon(s.status),
         ]);
 
-    return Container(
+    return SizedBox(
       height: 200,
       child: Card(
           margin: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),

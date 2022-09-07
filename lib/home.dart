@@ -6,7 +6,7 @@ import 'package:nool/model/student.dart';
 import 'package:nool/student_card.dart';
 import 'package:nool/student_detail.dart';
 import 'package:nool/utils/log.dart';
-import 'package:nool/utils/text.dart';
+import 'package:collection/collection.dart';
 
 class NoolHome extends StatefulWidget {
   const NoolHome({Key? key}) : super(key: key);
@@ -121,14 +121,27 @@ class _NoolHomeState extends State<NoolHome> {
         ));
   }
 
+  void setStudentStatus(String sid, String status) {
+    final Student? s = students.firstWhereOrNull(
+      (s) => s.studentID == sid,
+    );
+    if (s != null) {
+      setState(() {
+        s.status = status;
+      });
+    }
+  }
+
   Widget buildStudent(Student s) {
     return GestureDetector(
         onTap: () {
           Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (BuildContext context) =>
-                      StudentDetail(student: s)));
+                  builder: (BuildContext context) => StudentDetail(
+                        student: s,
+                        callback: setStudentStatus,
+                      )));
         },
         child: StudentCard(student: s));
   }
