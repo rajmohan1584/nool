@@ -53,7 +53,10 @@ class _NoolHomeState extends State<NoolHome> {
           (s) => s.studentID == sid,
         );
         if (s != null) {
-          setState(() => s.status = JSON.parseString(data, "status"));
+          setState(() {
+            s.status = JSON.parseString(data, "status");
+            onFilterData(groupValue, searchInputCtlr.text);
+          });
         } else {
           NLog.log("Error");
           NLog.log(data);
@@ -218,7 +221,6 @@ class _NoolHomeState extends State<NoolHome> {
   switchSegment(int group) {
     setState(() {
       groupValue = group;
-      //faults = faultFactory.faults(groupValue);
     });
     onFilterData(group, searchInputCtlr.text);
   }
