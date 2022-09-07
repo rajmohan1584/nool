@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nool/model/nool_status.dart';
 import 'package:nool/model/student.dart';
 import 'package:nool/student_card.dart';
 import 'package:nool/student_detail.dart';
+import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
 import 'package:nool/utils/text.dart';
@@ -23,15 +25,42 @@ class _NoolHomeState extends State<NoolHome> {
   bool loading = true;
   final searchInputCtlr = TextEditingController();
   Timer? debounce;
-  bool showFilter = true;
+  bool showFilter = false;
   int groupValue = 0;
   List<int> counts = [0, 0, 0, 0];
 
   @override
   void initState() {
     //StudentData.load();
-    onReloadData();
+    _onReloadData();
+    listenForChanges();
     super.initState();
+  }
+
+  _onReloadData() async {
+    await onReloadData();
+  }
+
+  listenForChanges() {
+    CollectionReference reference =
+        FirebaseFirestore.instance.collection('student_status');
+    reference.snapshots().listen((qs) {
+      for (var change in qs.docChanges) {
+        final doc = change.doc;
+        final sid = doc.id;
+        final data = doc.data() as Map<String, dynamic>;
+        final Student? s = students.firstWhereOrNull(
+          (s) => s.studentID == sid,
+        );
+        if (s != null) {
+          setState(() => s.status = JSON.parseString(data, "status"));
+        } else {
+          NLog.log("Error");
+          NLog.log(data);
+        }
+        NLog.log(data);
+      }
+    });
   }
 
   @override
@@ -195,6 +224,7 @@ class _NoolHomeState extends State<NoolHome> {
   }
 
   Widget buildFilter() {
+    if (!showFilter) return Container();
     return CupertinoSegmentedControl<int>(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       groupValue: groupValue,
@@ -217,7 +247,7 @@ class _NoolHomeState extends State<NoolHome> {
     );
     if (s != null) {
       setState(() {
-        s.status = status;
+        Student.saveStudentStatus(s, status);
       });
       onFilterData(groupValue, searchInputCtlr.text);
     }
@@ -261,9 +291,7 @@ class _NoolHomeState extends State<NoolHome> {
             onRefresh: onReloadData,
             child: SafeArea(
                 child: Column(children: [
-              Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
-                  child: searchInput()),
+              searchInput(),
               buildFilter(),
               Expanded(child: buildList())
             ]))));

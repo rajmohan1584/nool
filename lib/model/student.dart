@@ -6,6 +6,8 @@
 //import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:nool/utils/json.dart';
+import 'package:nool/utils/log.dart';
+import 'package:collection/collection.dart';
 
 class Student {
   String batch = '';
@@ -78,12 +80,6 @@ class Student {
   }
 
   static Future<List<Student>> loadStudents() async {
-    /*
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.ios)
-        .catchError((e) {
-      print(" Error : ${e.toString()}");
-    });
-    */
     List<Student> students = [];
 
     await FirebaseFirestore.instance
@@ -98,6 +94,35 @@ class Student {
       }
     });
 
+    await FirebaseFirestore.instance
+        .collection('student_status')
+        .get()
+        .then((QuerySnapshot qs) {
+      for (var doc in qs.docs) {
+        final sid = doc.id;
+        final data = doc.data() as Map<String, dynamic>;
+        final Student? s = students.firstWhereOrNull(
+          (s) => s.studentID == sid,
+        );
+        if (s != null) {
+          s.status = JSON.parseString(data, "status");
+          if (s.status.isEmpty) s.status = "pending";
+        } else {
+          NLog.log("Error");
+          NLog.log(data);
+        }
+      }
+    });
     return students;
+  }
+
+  static void saveStudentStatus(Student s, String status) async {
+    //status = s;
+    if (status.isEmpty) status = "pending";
+    final data = {"status": status};
+    await FirebaseFirestore.instance
+        .collection('student_status')
+        .doc(s.studentID)
+        .set(data, SetOptions(merge: true));
   }
 }
