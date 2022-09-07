@@ -4,8 +4,10 @@ import 'package:nool/model/student.dart';
 import 'package:nool/utils/text.dart';
 
 class StudentCard extends StatelessWidget {
-  const StudentCard({Key? key, required this.student}) : super(key: key);
+  const StudentCard({Key? key, required this.student, this.newStatus = ''})
+      : super(key: key);
   final Student student;
+  final String newStatus;
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +40,16 @@ class StudentCard extends StatelessWidget {
           TEXT.nameValueRow(" email id", s.parentEmailId),
         ]);
 
+    String status = s.status;
+    if (newStatus.isNotEmpty) status = newStatus;
+
     Widget statusRow = Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
-          Text(s.status),
+          Text(status),
           const SizedBox(width: 5),
-          NoolStatus.statusIcon(s.status),
+          NoolStatus.statusIcon(status),
         ]);
 
     return SizedBox(

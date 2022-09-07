@@ -15,6 +15,14 @@ class StudentDetail extends StatefulWidget {
 }
 
 class _StudentDetailState extends State<StudentDetail> {
+  late String status;
+
+  @override
+  void initState() {
+    status = widget.student.status;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     final name =
@@ -25,14 +33,15 @@ class _StudentDetailState extends State<StudentDetail> {
 
   Widget buildControl() {
     final children = <Widget>[];
-    for (var status in NoolStatus.all) {
-      children.add(status.icon);
-      children.add(Center(child: Text(status.msg)));
+    for (var nstat in NoolStatus.all) {
+      children.add(nstat.icon);
+      children.add(Center(child: Text(nstat.msg)));
       children.add(CupertinoSwitch(
-        value: status.name == widget.student.status,
+        value: nstat.name == status,
         onChanged: (value) {
           setState(() {
-            widget.callback(widget.student.studentID, status.name);
+            status = nstat.name;
+            widget.callback(widget.student.studentID, nstat.name);
           });
         },
       ));
@@ -62,7 +71,7 @@ class _StudentDetailState extends State<StudentDetail> {
 
   Widget buildBody() {
     return Column(children: [
-      StudentCard(student: widget.student),
+      StudentCard(student: widget.student, newStatus: status),
       Container(
         margin: const EdgeInsets.all(30),
         decoration: BoxDecoration(

@@ -25,7 +25,7 @@ class _NoolHomeState extends State<NoolHome> {
   bool loading = true;
   final searchInputCtlr = TextEditingController();
   Timer? debounce;
-  bool showFilter = false;
+  bool showFilter = true;
   int groupValue = 0;
   List<int> counts = [0, 0, 0, 0];
 
