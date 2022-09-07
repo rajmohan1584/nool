@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:nool/model/nool_status.dart';
 import 'package:nool/model/student.dart';
 import 'package:nool/student_card.dart';
 import 'package:nool/student_detail.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
+import 'package:nool/utils/text.dart';
 
 class NoolHome extends StatefulWidget {
   const NoolHome({Key? key}) : super(key: key);
@@ -17,10 +19,13 @@ class NoolHome extends StatefulWidget {
 
 class _NoolHomeState extends State<NoolHome> {
   List<Student> students = [];
-  List<Student> filteredStudents = [];
+  List<Student> displayStudents = [];
   bool loading = true;
   final searchInputCtlr = TextEditingController();
   Timer? debounce;
+  bool showFilter = true;
+  int groupValue = 0;
+  List<int> counts = [0, 0, 0, 0];
 
   @override
   void initState() {
@@ -46,7 +51,8 @@ class _NoolHomeState extends State<NoolHome> {
     setState(() {
       searchInputCtlr.clear();
       students = sl;
-      filteredStudents = sl;
+      displayStudents = sl;
+      counts = calcCounts();
     });
 
     NLog.log("Loaded ${students.length} students");
@@ -56,39 +62,78 @@ class _NoolHomeState extends State<NoolHome> {
     });
   }
 
+  onFilterData(int g, String query) {
+    var filtered = students;
+
+    switch (g) {
+      case 1:
+        filtered =
+            students.where((Student s) => s.status == "delivered").toList();
+        break;
+      case 2:
+        filtered =
+            students.where((Student s) => s.status == "partial").toList();
+        break;
+      case 3:
+        filtered =
+            students.where((Student s) => s.status == "pending").toList();
+        break;
+      default:
+        break;
+    }
+    if (groupValue > 0) {}
+    query = query.toLowerCase();
+    if (query.isEmpty) {
+      setState(() {
+        displayStudents = filtered;
+        counts = calcCounts();
+      });
+      return;
+    }
+    NLog.log(query);
+    final searchedAndFiltered = filtered.where((Student s) {
+      bool found = false;
+      for (var v in s.searchValues) {
+        if (v.isNotEmpty && v.startsWith(query)) {
+          found = true;
+          break;
+        }
+      }
+      return found;
+    }).toList();
+
+    setState(() {
+      displayStudents = searchedAndFiltered;
+      counts = calcCounts();
+    });
+  }
+
+  calcCounts() {
+    int c0 = 0, c1 = 0, c2 = 0, c3 = 0;
+    c0 = students.length;
+    for (var s in students) {
+      if (s.status == "delivered") c1++;
+      if (s.status == "partial") c2++;
+      if (s.status == "pending") c3++;
+    }
+    return [c0, c1, c2, c3];
+  }
+
   onSearchTextChanged(String query) {
     if (debounce?.isActive ?? false) debounce?.cancel();
     debounce = Timer(const Duration(milliseconds: 250), () {
-      query = query.toLowerCase();
-      if (query.isEmpty) {
-        setState(() {
-          filteredStudents = students;
-        });
-        return;
-      }
-      NLog.log(query);
-      final filtered = students.where((Student s) {
-        bool found = false;
-        for (var v in s.searchValues) {
-          if (v.isNotEmpty && v.startsWith(query)) {
-            found = true;
-            break;
-          }
-        }
-        return found;
-      }).toList();
-
-      setState(() {
-        filteredStudents = filtered;
-      });
+      onFilterData(groupValue, query);
     });
   }
 
   Widget searchInput() {
+    final xcolor =
+        searchInputCtlr.text.isNotEmpty ? Colors.blue : const Color(0xfff3f3f4);
     return Container(
         margin: const EdgeInsets.symmetric(vertical: 10),
         child: Row(
           children: <Widget>[
+            const SizedBox(width: 25),
             Flexible(
               child: TextField(
                   onChanged: onSearchTextChanged,
@@ -97,7 +142,7 @@ class _NoolHomeState extends State<NoolHome> {
                   obscureText: false,
                   decoration: const InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Search',
+                      hintText: 'Search by Name or ID',
                       fillColor: Color(0xfff3f3f4),
                       filled: true)),
             ),
@@ -109,16 +154,61 @@ class _NoolHomeState extends State<NoolHome> {
                   onTap: () {
                     setState(() {
                       searchInputCtlr.clear();
-                      filteredStudents = students;
+                      displayStudents = students;
                     });
                   },
-                  child: const Icon(
+                  child: Icon(
                     CupertinoIcons.clear_circled,
-                    color: Colors.blue,
+                    color: xcolor,
                   ),
-                ))
+                )),
+            const SizedBox(width: 25)
           ],
         ));
+  }
+
+  Widget segmentHeader(int g, String status) {
+    if (g == 0) {
+      return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8.0),
+          child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [const Text('All  '), TEXT.bold('${counts[0]}')]));
+    }
+
+    return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8.0),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              NoolStatus.statusIcon(status),
+              TEXT.bold('${counts[g]}')
+            ]));
+  }
+
+  switchSegment(int group) {
+    setState(() {
+      groupValue = group;
+      //faults = faultFactory.faults(groupValue);
+    });
+    onFilterData(group, searchInputCtlr.text);
+  }
+
+  Widget buildFilter() {
+    return CupertinoSegmentedControl<int>(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      groupValue: groupValue,
+      children: {
+        0: segmentHeader(0, ""),
+        1: segmentHeader(1, "delivered"),
+        2: segmentHeader(2, "partial"),
+        3: segmentHeader(3, "pending"),
+      },
+      onValueChanged: (groupValue) async {
+        switchSegment(groupValue);
+        NLog.log(groupValue);
+      },
+    );
   }
 
   void setStudentStatus(String sid, String status) {
@@ -129,6 +219,7 @@ class _NoolHomeState extends State<NoolHome> {
       setState(() {
         s.status = status;
       });
+      onFilterData(groupValue, searchInputCtlr.text);
     }
   }
 
@@ -148,9 +239,9 @@ class _NoolHomeState extends State<NoolHome> {
 
   Widget buildList() {
     return ListView.builder(
-        itemCount: filteredStudents.length,
+        itemCount: displayStudents.length,
         itemBuilder: (ctx, index) {
-          Student s = filteredStudents[index];
+          Student s = displayStudents[index];
           return buildStudent(s);
         });
   }
@@ -171,9 +262,9 @@ class _NoolHomeState extends State<NoolHome> {
             child: SafeArea(
                 child: Column(children: [
               Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 10.0, vertical: 5.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 5.0),
                   child: searchInput()),
+              buildFilter(),
               Expanded(child: buildList())
             ]))));
   }

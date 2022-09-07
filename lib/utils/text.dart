@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nool/utils/images.dart';
 
 class TEXT {
   static Widget nameText(String name) {
@@ -38,10 +37,8 @@ class TEXT {
         ]);
   }
 
-  static Widget statusImage(String status) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [IMAGES.statusImage(status), nameText(status)]);
+  static Widget bold(String s) {
+    return Text(s,
+        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13.0));
   }
 }
