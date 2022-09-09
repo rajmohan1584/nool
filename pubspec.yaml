@@ -42,7 +42,9 @@ dependencies:
   path_provider: ^2.0.11
   open_filex: ^4.1.0
   window_manager: ^0.2.7
-
+  pdf: ^3.8.3
+  printing: ^5.9.2
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,7 +64,7 @@ flutter_icons:
     generate: true
     image_path: "assets/images/nool.png"
     icon_size: 48
-    
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

@@ -11,6 +11,7 @@ import 'package:nool/student_detail.dart';
 import 'package:nool/utils/excel.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
+import 'package:nool/utils/pdf.dart';
 import 'package:nool/utils/text.dart';
 
 class NoolHome extends StatefulWidget {
@@ -293,10 +294,6 @@ class _NoolHomeState extends State<NoolHome> {
   Widget buildStudent(Student s) {
     return GestureDetector(
         onTap: () {
-          if (s.roomNo.isNotEmpty) {
-            NExcel.export(students);
-            return;
-          }
           Navigator.push(
               context,
               MaterialPageRoute(
@@ -317,6 +314,20 @@ class _NoolHomeState extends State<NoolHome> {
         });
   }
 
+  onActionSelected(BuildContext context, int value) {
+    switch (value) {
+      case 0:
+        NExcel.export(displayStudents);
+        break;
+      case 1:
+        NPDF.generate(displayStudents);
+        break;
+
+      default:
+        break;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -327,10 +338,14 @@ class _NoolHomeState extends State<NoolHome> {
                   fontWeight: FontWeight.bold,
                   fontFamily: "Catamaran-VariableFont_wght",
                   color: Colors.white)),
-          actions: <Widget>[
-            IconButton(
-              icon: const Icon(CupertinoIcons.share),
-              onPressed: () {},
+          actions: [
+            PopupMenuButton<int>(
+              onSelected: (value) => onActionSelected(context, value),
+              itemBuilder: (context) => const [
+                PopupMenuItem<int>(value: 0, child: Text("Export to Excel")),
+                PopupMenuItem<int>(value: 1, child: Text("Generate PDF")),
+                PopupMenuItem<int>(value: 2, child: Text("Print"))
+              ],
             )
           ],
         ),
