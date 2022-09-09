@@ -1,8 +1,13 @@
 //import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedart/firedart.dart';
+//import 'package:firedart/firedart.dart';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:nool/data/student.dart';
 import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
+import 'package:path_provider/path_provider.dart';
 
 class Student {
   String batch = '';
@@ -123,6 +128,7 @@ class Student {
   }
   */
 
+  /*
   // Windows app
   static Future<List<Student>> loadStudents() async {
     List<Student> students = [];
@@ -216,5 +222,69 @@ class Student {
     }
 
     s.status = status;
+  }
+  */
+
+  /* Hardcoded */
+
+  static Map<String, dynamic> statusMap = {};
+
+  static Future<List<Student>> loadHardCodedData() async {
+    statusMap = await readStudentMap();
+    List<Student> sl = StudentData.getHarcodedData();
+    statusMap.forEach((sid, status) {
+      final Student? s = sl.firstWhereOrNull(
+        (s) => s.studentID == sid,
+      );
+      if (s != null) {
+        s.status = status;
+      }
+    });
+
+    return sl;
+  }
+
+  static void saveStudentStatus(Student s, String status) async {
+    if (status.isEmpty) status = "pending";
+
+    final String studentID = s.studentID;
+    statusMap[studentID] = status;
+
+    s.status = status;
+
+    NLog.log(statusMap);
+
+    writeStudentMap();
+  }
+
+  static void writeStudentMap() async {
+    final directory = await getApplicationDocumentsDirectory();
+    String filePath = "${directory.path}/nool_status.map";
+    File file = File(filePath);
+    String s = '{';
+    String delim = '';
+    statusMap.forEach((key, value) {
+      s += '$delim"$key":"$value"';
+      delim = ',';
+    });
+    s += '}';
+    file.writeAsString(s);
+  }
+
+  static Future<Map<String, dynamic>> readStudentMap() async {
+    final directory = await getApplicationDocumentsDirectory();
+    String filePath = "${directory.path}/nool_status.map";
+
+    Map<String, dynamic> m = {};
+    File file = File(filePath);
+    if (file.existsSync()) {
+      try {
+        String s = file.readAsStringSync();
+        m = jsonDecode(s);
+      } catch (e) {
+        NLog.log(e.toString());
+      }
+    }
+    return m;
   }
 }

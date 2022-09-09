@@ -1,7 +1,8 @@
 import 'dart:io';
 
 //import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedart/firedart.dart';
+//import 'package:firedart/firedart.dart';
+import 'package:nool/model/student.dart';
 import 'package:nool/utils/log.dart';
 
 const List<String> students = [
@@ -464,9 +465,32 @@ const List<String> students = [
 const intFields = ["age"];
 
 class StudentData {
+/* Code to seed the database
   static void load() {
     final CollectionReference studentsRef =
         Firestore.instance.collection('/students');
+
+    final List<Map> smap = array2Map();
+    for (var m in smap) {
+      studentsRef.add(m);
+    }
+  }
+  */
+
+  static List<Student> getHarcodedData() {
+    List<Student> students = [];
+
+    final List<Map<String, dynamic>> smap = _array2Map();
+    for (var m in smap) {
+      Student s = Student.fromMap(m);
+      students.add(s);
+    }
+
+    return students;
+  }
+
+  static List<Map<String, dynamic>> _array2Map() {
+    final List<Map<String, dynamic>> smap = [];
 
     final len = students.length;
 
@@ -501,11 +525,12 @@ class StudentData {
 
           NLog.log("${fields[f]} = ${values[f]}");
         }
-        studentsRef.add(data);
+        smap.add(data);
       } else {
         NLog.log("Error $fieldCount != $valueCount");
         exit(1);
       }
     }
+    return smap;
   }
 }

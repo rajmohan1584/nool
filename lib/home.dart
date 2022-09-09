@@ -1,7 +1,7 @@
 import 'dart:async';
 
 //import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firedart/firedart.dart';
+//import 'package:firedart/firedart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nool/model/nool_status.dart';
@@ -33,9 +33,9 @@ class _NoolHomeState extends State<NoolHome> {
 
   @override
   void initState() {
-    //StudentData.load();
+    //StudentData.seedDatabase();
     _onReloadData();
-    listenForChanges();
+    //listenForChanges();
     super.initState();
   }
 
@@ -70,6 +70,7 @@ class _NoolHomeState extends State<NoolHome> {
   }
   */
 
+  /*
   // Windows
   listenForChanges() {
     final CollectionReference coll =
@@ -77,7 +78,7 @@ class _NoolHomeState extends State<NoolHome> {
 
     coll.document("*").stream.listen((event) {
       if (event != null) NLog.log(event);
-      /*
+      / *
       for (var change in event) {
         final doc = change.doc;
         final sid = doc.id;
@@ -97,9 +98,10 @@ class _NoolHomeState extends State<NoolHome> {
         NLog.log(data);
       }
     });
-    */
+    * /
     });
   }
+  */
 
   @override
   void dispose() {
@@ -113,7 +115,8 @@ class _NoolHomeState extends State<NoolHome> {
       //await Future.delayed(const Duration(milliseconds: 500));
     }
 
-    List<Student> sl = await Student.loadStudents();
+    //List<Student> sl = await Student.loadStudents();
+    List<Student> sl = await Student.loadHardCodedData();
 
     setState(() {
       searchInputCtlr.clear();
@@ -320,9 +323,11 @@ class _NoolHomeState extends State<NoolHome> {
         NExcel.export(displayStudents);
         break;
       case 1:
-        NPDF.generate(displayStudents);
+        NPDF.generateFile(displayStudents);
         break;
-
+      case 2:
+        NPDF.print(displayStudents);
+        break;
       default:
         break;
     }
