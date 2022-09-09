@@ -1,16 +1,43 @@
-import 'package:firebase_core/firebase_core.dart';
+//import 'package:firebase_core/firebase_core.dart';
+import 'dart:io';
+
+import 'package:firedart/firedart.dart';
 import 'package:flutter/material.dart';
-import 'package:nool/firebase_options.dart';
+//import 'package:nool/firebase_options.dart';
 import 'package:nool/home.dart';
 import 'package:nool/utils/log.dart';
+import 'package:window_manager/window_manager.dart';
+
+const apiKey = "AIzaSyCbnCd5De6C9Yapr5XccR4tixnzuQ3XZes";
+const projectId = "nool-e4a78";
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.ios)
+  /*
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
       .catchError((e) {
     NLog.log(" Error : ${e.toString()}");
   });
+  */
+  if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
 
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(400, 800),
+      center: true,
+      backgroundColor: Colors.transparent,
+      skipTaskbar: false,
+      //titleBarStyle: TitleBarStyle.hidden,
+    );
+
+    // Use it only after calling `hiddenWindowAtLaunch`
+    windowManager.waitUntilReadyToShow(windowOptions).then((_) async {
+      await windowManager.show();
+      await windowManager.focus();
+    });
+  }
+
+  Firestore.initialize(projectId);
   runApp(const MyApp());
 }
 

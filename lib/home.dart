@@ -1,12 +1,14 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firedart/firedart.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nool/model/nool_status.dart';
 import 'package:nool/model/student.dart';
 import 'package:nool/student_card.dart';
 import 'package:nool/student_detail.dart';
+import 'package:nool/utils/excel.dart';
 import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
@@ -41,6 +43,7 @@ class _NoolHomeState extends State<NoolHome> {
     await onReloadData();
   }
 
+  /* iOS
   listenForChanges() {
     CollectionReference reference =
         FirebaseFirestore.instance.collection('student_status');
@@ -63,6 +66,38 @@ class _NoolHomeState extends State<NoolHome> {
         }
         NLog.log(data);
       }
+    });
+  }
+  */
+
+  // Windows
+  listenForChanges() {
+    final CollectionReference coll =
+        Firestore.instance.collection('student_status_w');
+
+    coll.document("*").stream.listen((event) {
+      if (event != null) NLog.log(event);
+      /*
+      for (var change in event) {
+        final doc = change.doc;
+        final sid = doc.id;
+        final data = doc.data() as Map<String, dynamic>;
+        final Student? s = students.firstWhereOrNull(
+          (s) => s.studentID == sid,
+        );
+        if (s != null) {
+          setState(() {
+            s.status = JSON.parseString(data, "status");
+            onFilterData(groupValue, searchInputCtlr.text);
+          });
+        } else {
+          NLog.log("Error");
+          NLog.log(data);
+        }
+        NLog.log(data);
+      }
+    });
+    */
     });
   }
 
@@ -249,6 +284,7 @@ class _NoolHomeState extends State<NoolHome> {
     );
     if (s != null) {
       setState(() {
+        s.status = status;
         Student.saveStudentStatus(s, status);
       });
       onFilterData(groupValue, searchInputCtlr.text);
@@ -258,6 +294,10 @@ class _NoolHomeState extends State<NoolHome> {
   Widget buildStudent(Student s) {
     return GestureDetector(
         onTap: () {
+          if (s.roomNo.isNotEmpty) {
+            NExcel.export(students);
+            return;
+          }
           Navigator.push(
               context,
               MaterialPageRoute(

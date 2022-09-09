@@ -1,6 +1,7 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firedart/firedart.dart';
 import 'package:nool/utils/log.dart';
 
 const List<String> students = [
@@ -465,7 +466,7 @@ const intFields = ["age"];
 class StudentData {
   static void load() {
     final CollectionReference studentsRef =
-        FirebaseFirestore.instance.collection('/students');
+        Firestore.instance.collection('/students');
 
     final len = students.length;
 
