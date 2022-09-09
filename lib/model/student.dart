@@ -1,10 +1,5 @@
-//import 'package:trueops/model/ratings.dart';
-//import 'package:trueops/utils/date_time.dart';
-//import 'package:trueops/utils/format.dart';
-//import 'package:trueops/utils/json.dart';
-
-//import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+//import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firedart/firedart.dart';
 import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
@@ -79,6 +74,7 @@ class Student {
     return s;
   }
 
+  /* iOS
   static Future<List<Student>> loadStudents() async {
     List<Student> students = [];
 
@@ -124,5 +120,101 @@ class Student {
         .collection('student_status')
         .doc(s.studentID)
         .set(data, SetOptions(merge: true));
+  }
+  */
+
+  // Windows app
+  static Future<List<Student>> loadStudents() async {
+    List<Student> students = [];
+
+    //
+    // Read students collection
+    //
+    CollectionReference coll = Firestore.instance.collection('students');
+    QueryReference query = coll.orderBy("studentID").limit(100);
+
+    bool done = false;
+    while (!done) {
+      final List<Document> docs = await query.get();
+      NLog.log("Quert returned ${docs.length}");
+
+      for (var doc in docs) {
+        Student s = Student.fromMap(doc.map);
+        students.add(s);
+        //NLog.log(doc);
+      }
+
+      if (docs.length < 100) {
+        done = true;
+      } else {
+        final lastStudentID = docs[docs.length - 1]["studentID"];
+        query = coll
+            .orderBy("studentID")
+            .where("studentID", isGreaterThan: lastStudentID)
+            .limit(100);
+      }
+    }
+
+    //
+    // Read student_status collection
+    //
+    coll = Firestore.instance.collection('student_status_w');
+    query = coll.orderBy("studentID").limit(100);
+
+    done = false;
+    while (!done) {
+      final docs = await query.get();
+      NLog.log("Query returned ${docs.length}");
+
+      for (var doc in docs) {
+        final String studentID = doc["studentID"];
+        final Student? s = students.firstWhereOrNull(
+          (s) => s.studentID == studentID,
+        );
+        if (s != null) {
+          s.status = JSON.parseString(doc, "status");
+          if (s.status.isEmpty) s.status = "pending";
+        } else {
+          NLog.log("Error");
+          NLog.log(doc);
+        }
+      }
+
+      if (docs.length < 100) {
+        done = true;
+      } else {
+        final String lastStudentID = docs[docs.length - 1]["studentID"];
+        query = coll
+            .orderBy("studentID")
+            .where("studentID", isGreaterThan: lastStudentID)
+            .limit(100);
+      }
+    }
+
+    return students;
+  }
+
+  static void saveStudentStatus(Student s, String status) async {
+    if (status.isEmpty) status = "pending";
+
+    final String studentID = s.studentID;
+    final CollectionReference coll =
+        Firestore.instance.collection('student_status_w');
+    final QueryReference query = coll.where('studentID', isEqualTo: studentID);
+    final List<Document> docs = await query.get();
+
+    var now = DateTime.now();
+
+    if (docs.isEmpty) {
+      NLog.log('Adding student_status_w $studentID - $status');
+      await coll
+          .add({"studentID": studentID, "status": status, "updated": now});
+    } else {
+      final Document doc = docs[0];
+      NLog.log('Adding student_status_w ${doc.id} $studentID - $status');
+      await coll.document(doc.id).update({"status": status, "updated": now});
+    }
+
+    s.status = status;
   }
 }

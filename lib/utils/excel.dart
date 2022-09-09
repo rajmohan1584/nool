@@ -17,14 +17,16 @@ class NExcel {
 
     int row = 1;
     for (var s in sl) {
-      final c1 = CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row++);
+      final c1 = CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row);
       sheet.cell(c1).value = s.studentFirstName;
 
-      final c2 = CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row++);
+      final c2 = CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: row);
       sheet.cell(c2).value = s.studentLastName;
 
-      final c3 = CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row++);
+      final c3 = CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: row);
       sheet.cell(c3).value = s.studentID;
+
+      row++;
     }
 
     // when you are in flutter web then save() downloads the excel file.
