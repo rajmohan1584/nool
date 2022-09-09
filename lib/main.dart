@@ -5,7 +5,6 @@ import 'package:firedart/firedart.dart';
 import 'package:flutter/material.dart';
 //import 'package:nool/firebase_options.dart';
 import 'package:nool/home.dart';
-import 'package:nool/utils/log.dart';
 import 'package:window_manager/window_manager.dart';
 
 const apiKey = "AIzaSyCbnCd5De6C9Yapr5XccR4tixnzuQ3XZes";

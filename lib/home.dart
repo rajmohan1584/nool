@@ -9,7 +9,6 @@ import 'package:nool/model/student.dart';
 import 'package:nool/student_card.dart';
 import 'package:nool/student_detail.dart';
 import 'package:nool/utils/excel.dart';
-import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
 import 'package:nool/utils/text.dart';
@@ -328,6 +327,12 @@ class _NoolHomeState extends State<NoolHome> {
                   fontWeight: FontWeight.bold,
                   fontFamily: "Catamaran-VariableFont_wght",
                   color: Colors.white)),
+          actions: <Widget>[
+            IconButton(
+              icon: const Icon(CupertinoIcons.share),
+              onPressed: () {},
+            )
+          ],
         ),
         body: RefreshIndicator(
             onRefresh: onReloadData,
