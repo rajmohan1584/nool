@@ -58,7 +58,11 @@ dev_dependencies:
 flutter_icons:
   ios: true
   image_path: "assets/images/nool.png"
-
+  windows:
+    generate: true
+    image_path: "assets/images/nool.png"
+    icon_size: 48
+    
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
