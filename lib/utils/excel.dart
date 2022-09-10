@@ -30,7 +30,6 @@ class NExcel {
       _addCell(sheet, 5, row, s.studentID);
       _addCell(sheet, 6, row, s.studentFirstName);
       _addCell(sheet, 7, row, s.studentLastName);
-      _addCell(sheet, 7, row, s.studentTamilName);
       _addCell(sheet, 8, row, s.status);
 
       _addCell(sheet, 9, row, s.age);

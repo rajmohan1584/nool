@@ -24,7 +24,7 @@ class StudentCard extends StatelessWidget {
     final children = <Widget>[];
 
     bool isTamil = false;
-    // ignore: avoid_function_literals_in_foreach_calls
+
     final runes = s.studentTamilName.runes;
     for (var rune in runes) {
       if (rune > 128) {
@@ -32,6 +32,11 @@ class StudentCard extends StatelessWidget {
       }
       break;
     }
+
+    String status = s.status;
+    if (newStatus.isNotEmpty) status = newStatus;
+
+    Widget statusIcon = NoolStatus.statusIcon(status);
 
     if (isTamil) {
       Widget tamilName = Text(s.studentTamilName,
@@ -41,17 +46,27 @@ class StudentCard extends StatelessWidget {
             fontFamily: "Catamaran-VariableFont_wght",
           ));
 
-      children.add(tamilName);
+      children.add(Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[statusIcon, const SizedBox(width: 5), tamilName]));
     }
 
     Widget name = Text("${s.studentFirstName} ${s.studentLastName}",
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
-    children.add(name);
+    if (!isTamil) {
+      children.add(Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[statusIcon, const SizedBox(width: 5), name]));
+    } else {
+      children.add(name);
+    }
     children.add(const Divider(color: Colors.grey));
 
     Widget row2 = Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           TEXT.nameValue("age", "${s.age}yrs"),
@@ -63,39 +78,28 @@ class StudentCard extends StatelessWidget {
     children.add(row2);
     children.add(const Divider());
 
+    final wemail = TEXT.valueText(s.parentEmailId, fontSize: 11.0);
+
+    final parentItems = <Widget>[
+      TEXT.valueText(s.parent1Name, fontSize: 11.0),
+      TEXT.valueText(s.parent2Name, fontSize: 11.0)
+    ];
+    if (cardCount < 0) {
+      parentItems.add(wemail);
+    } else {
+      Widget wcount =
+          TEXT.nameText("${s.cardIndex + 1} / $cardCount", fontSize: 9.0);
+      parentItems.add(Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [wemail, wcount]));
+    }
     Widget parentRow = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          TEXT.valueText(s.parent1Name),
-          TEXT.valueText(s.parent2Name),
-          TEXT.valueText(s.parentEmailId),
-        ]);
+        children: parentItems);
     children.add(parentRow);
 
-    String status = s.status;
-    if (newStatus.isNotEmpty) status = newStatus;
-
-    Widget wstatus = Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[
-          Text(status),
-          const SizedBox(width: 5),
-          NoolStatus.statusIcon(status),
-        ]);
-
-    if (cardCount < 0) {
-      children.add(wstatus);
-    } else {
-      Widget count = TEXT.nameText("${s.cardIndex + 1} / $cardCount");
-      Widget statusRow = Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [count, wstatus],
-      );
-      children.add(statusRow);
-    }
     final dHt = isTamil ? 30.0 : 0.0;
 
     return SizedBox(

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 
 class TEXT {
-  static Widget nameText(String name) {
-    return Text(name, style: const TextStyle(fontSize: 12.0));
+  static Widget nameText(String name, {double fontSize = 12.0}) {
+    return Text(name, style: TextStyle(fontSize: fontSize));
   }
 
-  static Widget valueText(String value, {bool ellipsis = false}) {
+  static Widget valueText(String value,
+      {double fontSize = 14.0, bool ellipsis = false}) {
     if (ellipsis) {
       return Flexible(
-          child: Text(
-        value,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(
-          fontSize: 14.0,
-        ),
-      ));
+          child: Text(value,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: fontSize,
+              )));
     }
-    return Text(value, style: const TextStyle(fontSize: 14.0));
+    return Text(value, style: TextStyle(fontSize: fontSize));
   }
 
   static Widget nameValue(String name, String value) {

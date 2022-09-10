@@ -280,7 +280,7 @@ class _NoolHomeState extends State<NoolHome> {
   Widget buildFilter() {
     if (!showFilter) return Container();
     return CupertinoSegmentedControl<int>(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 0),
       groupValue: groupValue,
       children: {
         0: segmentHeader(0, ""),
@@ -375,6 +375,10 @@ class _NoolHomeState extends State<NoolHome> {
                 child: Column(children: [
               searchInput(),
               buildFilter(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Divider(color: Colors.grey),
+              ),
               Expanded(child: buildList())
             ]))));
   }

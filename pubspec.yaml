@@ -84,6 +84,8 @@ flutter:
         - asset: assets/fonts/Catamaran-VariableFont_wght.ttf
   assets:
     - assets/images/
+    - assets/fonts/OpenSans-Regular.ttf
+    - assets/fonts/Catamaran-VariableFont_wght.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
