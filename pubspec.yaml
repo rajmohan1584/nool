@@ -45,6 +45,7 @@ dependencies:
   window_manager: ^0.2.7
   pdf: ^3.8.3
   printing: ^5.9.2
+  animate_icons: ^2.0.0
   
 dev_dependencies:
   flutter_test:

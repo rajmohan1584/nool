@@ -33,6 +33,7 @@ class Student {
   bool distributed = false;
 
   List<String> searchValues = [];
+  int cardIndex = -1;
 /*
       batch = 2022
       schoolName = "NJ Thiruvalluvar Tamil School
@@ -279,7 +280,7 @@ class Student {
 
     final rows = await csv
         .transform(utf8.decoder)
-        .transform(CsvToListConverter())
+        .transform(const CsvToListConverter())
         .toList();
 
     final lineCount = rows.length;
@@ -328,6 +329,17 @@ class Student {
     }
 
     NLog.log("Loaded ${students.length} rows");
+
+    statusMap = await readStudentMap();
+    statusMap.forEach((sid, status) {
+      final Student? s = students.firstWhereOrNull(
+        (s) => s.studentID == sid,
+      );
+      if (s != null) {
+        s.status = status;
+      }
+    });
+
     return students;
   }
 

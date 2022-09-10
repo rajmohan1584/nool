@@ -71,7 +71,7 @@ class _StudentDetailState extends State<StudentDetail> {
 
   Widget buildBody() {
     return Column(children: [
-      StudentCard(student: widget.student, newStatus: status),
+      StudentCard(cardCount: -1, student: widget.student, newStatus: status),
       Container(
         margin: const EdgeInsets.all(30),
         decoration: BoxDecoration(

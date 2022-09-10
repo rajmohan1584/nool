@@ -124,6 +124,10 @@ class _NoolHomeState extends State<NoolHome> {
       searchInputCtlr.clear();
       students = sl;
       displayStudents = sl;
+      int cardIndex = 0;
+      for (var s in displayStudents) {
+        s.cardIndex = cardIndex++;
+      }
       counts = calcCounts();
     });
 
@@ -158,6 +162,10 @@ class _NoolHomeState extends State<NoolHome> {
     if (query.isEmpty) {
       setState(() {
         displayStudents = filtered;
+        int cardIndex = 0;
+        for (var s in displayStudents) {
+          s.cardIndex = cardIndex++;
+        }
         counts = calcCounts();
       });
       return;
@@ -176,6 +184,10 @@ class _NoolHomeState extends State<NoolHome> {
 
     setState(() {
       displayStudents = searchedAndFiltered;
+      int cardIndex = 0;
+      for (var s in displayStudents) {
+        s.cardIndex = cardIndex++;
+      }
       counts = calcCounts();
     });
   }
@@ -226,8 +238,8 @@ class _NoolHomeState extends State<NoolHome> {
                   onTap: () {
                     setState(() {
                       searchInputCtlr.clear();
-                      displayStudents = students;
                     });
+                    onFilterData(groupValue, searchInputCtlr.text);
                   },
                   child: Icon(
                     CupertinoIcons.clear_circled,
@@ -296,7 +308,7 @@ class _NoolHomeState extends State<NoolHome> {
     }
   }
 
-  Widget buildStudent(Student s) {
+  Widget buildStudent(int cardCount, Student s) {
     return GestureDetector(
         onTap: () {
           Navigator.push(
@@ -307,15 +319,16 @@ class _NoolHomeState extends State<NoolHome> {
                         callback: setStudentStatus,
                       )));
         },
-        child: StudentCard(student: s));
+        child: StudentCard(cardCount: cardCount, student: s));
   }
 
   Widget buildList() {
+    int cardCount = displayStudents.length;
     return ListView.builder(
-        itemCount: displayStudents.length,
+        itemCount: cardCount,
         itemBuilder: (ctx, index) {
           Student s = displayStudents[index];
-          return buildStudent(s);
+          return buildStudent(cardCount, s);
         });
   }
 

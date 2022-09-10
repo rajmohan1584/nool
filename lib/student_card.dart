@@ -4,8 +4,13 @@ import 'package:nool/model/student.dart';
 import 'package:nool/utils/text.dart';
 
 class StudentCard extends StatelessWidget {
-  const StudentCard({Key? key, required this.student, this.newStatus = ''})
+  const StudentCard(
+      {Key? key,
+      required this.cardCount,
+      required this.student,
+      this.newStatus = ''})
       : super(key: key);
+  final int cardCount;
   final Student student;
   final String newStatus;
 
@@ -35,6 +40,7 @@ class StudentCard extends StatelessWidget {
             fontWeight: FontWeight.bold,
             fontFamily: "Catamaran-VariableFont_wght",
           ));
+
       children.add(tamilName);
     }
 
@@ -42,7 +48,7 @@ class StudentCard extends StatelessWidget {
         overflow: TextOverflow.ellipsis,
         style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold));
     children.add(name);
-    children.add(const Divider());
+    children.add(const Divider(color: Colors.grey));
 
     Widget row2 = Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,22 +61,22 @@ class StudentCard extends StatelessWidget {
           TEXT.nameValue("ID", s.studentID),
         ]);
     children.add(row2);
-    children.add(const SizedBox(height: 5));
+    children.add(const Divider());
 
     Widget parentRow = Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          TEXT.nameValueRow("parent-1", s.parent1Name),
-          TEXT.nameValueRow("parent-2", s.parent2Name),
-          TEXT.nameValueRow(" email id", s.parentEmailId),
+          TEXT.valueText(s.parent1Name),
+          TEXT.valueText(s.parent2Name),
+          TEXT.valueText(s.parentEmailId),
         ]);
     children.add(parentRow);
 
     String status = s.status;
     if (newStatus.isNotEmpty) status = newStatus;
 
-    Widget statusRow = Row(
+    Widget wstatus = Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
@@ -78,8 +84,18 @@ class StudentCard extends StatelessWidget {
           const SizedBox(width: 5),
           NoolStatus.statusIcon(status),
         ]);
-    children.add(statusRow);
 
+    if (cardCount < 0) {
+      children.add(wstatus);
+    } else {
+      Widget count = TEXT.nameText("${s.cardIndex + 1} / $cardCount");
+      Widget statusRow = Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [count, wstatus],
+      );
+      children.add(statusRow);
+    }
     final dHt = isTamil ? 30.0 : 0.0;
 
     return SizedBox(
