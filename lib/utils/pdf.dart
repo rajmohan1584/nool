@@ -21,6 +21,7 @@ class NPDF {
     final List<pw.Column> cols = [];
     cols.add(_buildCol(s.studentFirstName));
     cols.add(_buildCol(s.studentLastName));
+    cols.add(_buildCol(s.studentTamilName));
     cols.add(_buildCol(s.studentID));
     cols.add(_buildCol("  ${s.age}yrs  "));
     cols.add(_buildCol(s.status));

@@ -116,7 +116,9 @@ class _NoolHomeState extends State<NoolHome> {
     }
 
     //List<Student> sl = await Student.loadStudents();
-    List<Student> sl = await Student.loadHardCodedData();
+    //List<Student> sl = await Student.loadHardCodedData();
+    //List<Student> sl = await Student.getDataFromExcelFile();
+    List<Student> sl = await Student.getDataFromCsvFile();
 
     setState(() {
       searchInputCtlr.clear();

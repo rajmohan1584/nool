@@ -3,6 +3,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:csv/csv.dart';
+import 'package:excel/excel.dart';
 import 'package:nool/data/student.dart';
 import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
@@ -61,6 +63,7 @@ class Student {
     s.studentID = JSON.parseString(map, 'studentID');
     s.studentFirstName = JSON.parseString(map, 'studentFirstName');
     s.studentLastName = JSON.parseString(map, 'studentLastName');
+    s.studentTamilName = JSON.parseString(map, 'studentTamilName');
 
     s.age = JSON.parseInt(map, 'age') ?? 0;
     s.userName = JSON.parseString(map, 'userName');
@@ -242,6 +245,90 @@ class Student {
     });
 
     return sl;
+  }
+
+  static Future<List<Student>> getDataFromExcelFile() async {
+    List<Student> students = [];
+
+    final directory = await getApplicationDocumentsDirectory();
+    String filePath = "${directory.path}/Students_Detail_Report_2022.xls";
+    File xls = File(filePath);
+
+    var bytes = xls.readAsBytesSync();
+    var excel = Excel.decodeBytes(bytes);
+
+    for (var table in excel.tables.keys) {
+      NLog.log(table); //sheet Name
+      NLog.log(excel.tables[table]!.maxCols);
+      NLog.log(excel.tables[table]!.maxRows);
+      for (var row in excel.tables[table]!.rows) {
+        NLog.log("$row");
+      }
+    }
+
+    return students;
+  }
+
+  static Future<List<Student>> getDataFromCsvFile() async {
+    List<Student> students = [];
+    final List<Map<String, dynamic>> smap = [];
+
+    final directory = await getApplicationDocumentsDirectory();
+    String filePath = "${directory.path}/Students_Detail_Report_2022.csv";
+    final csv = File(filePath).openRead();
+
+    final rows = await csv
+        .transform(utf8.decoder)
+        .transform(CsvToListConverter())
+        .toList();
+
+    final lineCount = rows.length;
+    NLog.log("CSV Line Count $lineCount");
+
+    if (lineCount > 0) {
+      final List<dynamic> headersRow = rows[0];
+      List<String> headers = headersRow.map((e) => e.toString()).toList();
+      List<String> fields = [];
+
+      for (var h in headers) {
+        h = h.replaceAll(' ', '');
+        h = h.replaceAll('.', '');
+        h = h.substring(0, 1).toLowerCase() + h.substring(1);
+        fields.add(h);
+      }
+      final fieldCount = fields.length;
+      NLog.log(fields);
+
+      for (var i = 1; i < lineCount; i++) {
+        final List<dynamic> values = rows[i];
+        final valueCount = values.length;
+        if (fieldCount == valueCount) {
+          Map<String, dynamic> data = <String, dynamic>{};
+
+          for (var f = 0; f < fieldCount; f++) {
+            final String field = fields[f];
+            final String rawValue = values[f].toString();
+            final String value = rawValue.replaceAll('"', '');
+            final bool intField = intFields.contains(field);
+
+            data[fields[f]] = intField ? int.parse(value) : value;
+
+            NLog.log("${fields[f]} = ${values[f]}");
+          }
+          smap.add(data);
+        } else {
+          NLog.log("Error $fieldCount != $valueCount");
+          exit(1);
+        }
+      }
+      for (var m in smap) {
+        Student s = Student.fromMap(m);
+        students.add(s);
+      }
+    }
+
+    NLog.log("Loaded ${students.length} rows");
+    return students;
   }
 
   static void saveStudentStatus(Student s, String status) async {
