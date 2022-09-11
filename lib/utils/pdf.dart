@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:nool/model/student.dart';
+import 'package:nool/utils/alert.dart';
 import 'package:nool/utils/log.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -25,9 +27,9 @@ class NPDF {
     final List<pw.Column> cols = [];
     cols.add(_buildCol(s.studentFirstName, myStyle));
     cols.add(_buildCol(s.studentLastName, myStyle));
-
     cols.add(_buildCol(s.studentID, myStyle));
     cols.add(_buildCol("  ${s.age}yrs  ", myStyle));
+
     cols.add(_buildCol(s.status, myStyle));
     cols.add(_buildCol(s.gradeName, myStyle));
     cols.add(_buildCol(s.sectionName, myStyle));
@@ -75,17 +77,24 @@ class NPDF {
     return pdf;
   }
 
-  static generateFile(List<Student> sl) async {
-    var data = await rootBundle.load("assets/fonts/OpenSans-Regular.ttf");
-    var myFont = pw.Font.ttf(data);
-    var myStyle = pw.TextStyle(font: myFont, fontSize: 6);
+  static generateFile(BuildContext context, List<Student> sl) async {
+    try {
+      var data = await rootBundle.load("assets/fonts/OpenSans-Regular.ttf");
+      var myFont = pw.Font.ttf(data);
+      var myStyle = pw.TextStyle(font: myFont, fontSize: 6);
 
-    final pdf = _generatePdf(sl, myStyle);
-    var directory = await getApplicationDocumentsDirectory();
-    final path = "${directory.path}/nool.pdf";
-    final file = File(path);
+      final pdf = _generatePdf(sl, myStyle);
+      var directory = await getApplicationDocumentsDirectory();
+      final path = "${directory.path}/nool.pdf";
+      final file = File(path);
 
-    await file.writeAsBytes(await pdf.save());
+      await file
+          .writeAsBytes(await pdf.save(), flush: true)
+          .then((value) => NAlert.alert(context, "PDF Created", path));
+    } catch (e) {
+      NAlert.alert(context, "Error in gen PDF", e.toString());
+      return;
+    }
   }
 
   static print(List<Student> sl) async {

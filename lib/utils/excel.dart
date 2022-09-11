@@ -22,22 +22,19 @@ class NExcel {
 
     int row = 0;
     for (var s in sl) {
-      _addCell(sheet, 0, row, s.batch);
-      _addCell(sheet, 1, row, s.schoolName);
-      _addCell(sheet, 2, row, s.gradeName);
-      _addCell(sheet, 3, row, s.sectionName);
-      _addCell(sheet, 4, row, s.roomNo);
-      _addCell(sheet, 5, row, s.studentID);
-      _addCell(sheet, 6, row, s.studentFirstName);
-      _addCell(sheet, 7, row, s.studentLastName);
-      _addCell(sheet, 8, row, s.status);
-
-      _addCell(sheet, 9, row, s.age);
-      _addCell(sheet, 10, row, s.userName);
-      _addCell(sheet, 11, row, s.parent1Name);
-      _addCell(sheet, 12, row, s.parent2Name);
-      _addCell(sheet, 13, row, s.parentEmailId);
-      _addCell(sheet, 14, row, s.parentAltEmailId);
+      _addCell(sheet, 1, row, s.studentFirstName);
+      _addCell(sheet, 2, row, s.studentLastName);
+      _addCell(sheet, 3, row, s.studentID);
+      _addCell(sheet, 4, row, s.age);
+      _addCell(sheet, 5, row, s.status);
+      _addCell(sheet, 6, row, s.gradeName);
+      _addCell(sheet, 7, row, s.sectionName);
+      _addCell(sheet, 8, row, s.roomNo);
+      _addCell(sheet, 9, row, s.userName);
+      _addCell(sheet, 10, row, s.parent1Name);
+      _addCell(sheet, 11, row, s.parent2Name);
+      _addCell(sheet, 12, row, s.parentEmailId);
+      _addCell(sheet, 13, row, s.parentAltEmailId);
 
       /*
       final c1 = CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: row);

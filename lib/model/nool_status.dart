@@ -28,6 +28,7 @@ class NoolStatus {
         "pending",
         Icon(
           CupertinoIcons.circle,
+          color: Colors.grey,
           size: 30,
         ),
         "Pending")

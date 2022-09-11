@@ -5,7 +5,9 @@ import 'dart:io';
 
 import 'package:csv/csv.dart';
 import 'package:excel/excel.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:nool/data/student.dart';
+import 'package:nool/utils/alert.dart';
 import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
@@ -270,7 +272,7 @@ class Student {
     return students;
   }
 
-  static Future<List<Student>> getDataFromCsvFile() async {
+  static Future<List<Student>> getDataFromCsvFile(BuildContext context) async {
     List<Student> students = [];
     final List<Map<String, dynamic>> smap = [];
 
@@ -313,13 +315,12 @@ class Student {
             final bool intField = intFields.contains(field);
 
             data[fields[f]] = intField ? int.parse(value) : value;
-
-            NLog.log("${fields[f]} = ${values[f]}");
           }
           smap.add(data);
         } else {
-          NLog.log("Error $fieldCount != $valueCount");
-          exit(1);
+          NAlert.alert(
+              context, "Error Loading CSV", "Error $fieldCount != $valueCount");
+          return [];
         }
       }
       for (var m in smap) {

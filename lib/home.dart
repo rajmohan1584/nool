@@ -8,6 +8,7 @@ import 'package:nool/model/nool_status.dart';
 import 'package:nool/model/student.dart';
 import 'package:nool/student_card.dart';
 import 'package:nool/student_detail.dart';
+import 'package:nool/utils/alert.dart';
 import 'package:nool/utils/excel.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
@@ -118,23 +119,18 @@ class _NoolHomeState extends State<NoolHome> {
     //List<Student> sl = await Student.loadStudents();
     //List<Student> sl = await Student.loadHardCodedData();
     //List<Student> sl = await Student.getDataFromExcelFile();
-    List<Student> sl = await Student.getDataFromCsvFile();
+    List<Student> sl = await Student.getDataFromCsvFile(context);
 
     setState(() {
       searchInputCtlr.clear();
       students = sl;
-      displayStudents = sl;
-      int cardIndex = 0;
-      for (var s in displayStudents) {
-        s.cardIndex = cardIndex++;
-      }
-      counts = calcCounts();
     });
-
-    NLog.log("Loaded ${students.length} students");
+    onFilterData(groupValue, searchInputCtlr.text);
 
     setState(() {
       loading = false;
+      NAlert.alert(
+          context, "Load Complete", "Loaded ${students.length} student rows.");
     });
   }
 
@@ -255,19 +251,23 @@ class _NoolHomeState extends State<NoolHome> {
     if (g == 0) {
       return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8.0),
-          child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [const Text('All  '), TEXT.bold('${counts[0]}')]));
+          child:
+              Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+            Text('All  ${counts[0]}',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, color: Colors.blue))
+          ]));
     }
 
     return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8.0),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              NoolStatus.statusIcon(status),
-              TEXT.bold('${counts[g]}')
-            ]));
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          NoolStatus.statusIcon(status),
+          Text('${counts[g]}',
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold, color: Colors.blue))
+        ]));
   }
 
   switchSegment(int group) {
@@ -280,6 +280,7 @@ class _NoolHomeState extends State<NoolHome> {
   Widget buildFilter() {
     if (!showFilter) return Container();
     return CupertinoSegmentedControl<int>(
+      selectedColor: Color.fromARGB(255, 189, 232, 237),
       padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 0),
       groupValue: groupValue,
       children: {
@@ -335,13 +336,19 @@ class _NoolHomeState extends State<NoolHome> {
   onActionSelected(BuildContext context, int value) {
     switch (value) {
       case 0:
-        NExcel.export(displayStudents);
+        onReloadData();
         break;
       case 1:
-        NPDF.generateFile(displayStudents);
+        NExcel.export(displayStudents);
         break;
       case 2:
+        NPDF.generateFile(context, displayStudents);
+        break;
+      case 3:
         NPDF.print(displayStudents);
+        break;
+      case 4:
+        NAlert.alert(context, "Sync", "TODO");
         break;
       default:
         break;
@@ -362,9 +369,13 @@ class _NoolHomeState extends State<NoolHome> {
             PopupMenuButton<int>(
               onSelected: (value) => onActionSelected(context, value),
               itemBuilder: (context) => const [
-                PopupMenuItem<int>(value: 0, child: Text("Export to Excel")),
-                PopupMenuItem<int>(value: 1, child: Text("Generate PDF")),
-                PopupMenuItem<int>(value: 2, child: Text("Print"))
+                PopupMenuItem<int>(value: 0, child: Text("Reload CSV")),
+                PopupMenuDivider(),
+                PopupMenuItem<int>(value: 1, child: Text("Export to Excel")),
+                PopupMenuItem<int>(value: 2, child: Text("Generate PDF")),
+                PopupMenuItem<int>(value: 3, child: Text("Print")),
+                PopupMenuDivider(),
+                PopupMenuItem<int>(value: 4, child: Text("Sync to DB")),
               ],
             )
           ],
