@@ -278,6 +278,12 @@ class Student {
 
     final directory = await getApplicationDocumentsDirectory();
     String filePath = "${directory.path}/Students_Detail_Report_2022.csv";
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      // ignore: use_build_context_synchronously
+      NAlert.alert(context, 'Missing File', filePath);
+      return [];
+    }
     final csv = File(filePath).openRead();
 
     final rows = await csv
