@@ -280,7 +280,7 @@ class _NoolHomeState extends State<NoolHome> {
   Widget buildFilter() {
     if (!showFilter) return Container();
     return CupertinoSegmentedControl<int>(
-      selectedColor: Color.fromARGB(255, 189, 232, 237),
+      selectedColor: const Color.fromARGB(255, 196, 221, 245),
       padding: const EdgeInsets.fromLTRB(20.0, 0, 20, 0),
       groupValue: groupValue,
       children: {
@@ -357,14 +357,20 @@ class _NoolHomeState extends State<NoolHome> {
 
   @override
   Widget build(BuildContext context) {
+    const nool = Text("நூல் விநியோகம்",
+        style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            fontFamily: "Catamaran-VariableFont_wght",
+            color: Colors.white));
+    final ver = TEXT.nameText('2.1', fontSize: 10);
+
+    final title = Row(
+      children: [nool, const SizedBox(width: 10), ver],
+    );
     return Scaffold(
         appBar: AppBar(
-          title: const Text("நூல் விநியோகம்",
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: "Catamaran-VariableFont_wght",
-                  color: Colors.white)),
+          title: title,
           actions: [
             PopupMenuButton<int>(
               onSelected: (value) => onActionSelected(context, value),

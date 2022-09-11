@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Nool"
-#define MyAppVersion "1.6"
+#define MyAppVersion "2.1"
 #define MyAppPublisher "Raj Mohan"
 #define MyAppExeName "nool.exe"
 

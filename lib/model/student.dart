@@ -272,6 +272,22 @@ class Student {
     return students;
   }
 
+  static bool _isTitleLine(List<dynamic> line) {
+    if (line.isNotEmpty) {
+      if (line[0].startsWith("Students Detail Report")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static bool _isBlankLine(List<dynamic> line) {
+    for (var s in line) {
+      if (s.toString().isNotEmpty) return false;
+    }
+    return true;
+  }
+
   static Future<List<Student>> getDataFromCsvFile(BuildContext context) async {
     List<Student> students = [];
     final List<Map<String, dynamic>> smap = [];
@@ -294,8 +310,15 @@ class Student {
     final lineCount = rows.length;
     NLog.log("CSV Line Count $lineCount");
 
+    int skippedCount = 0;
     if (lineCount > 0) {
-      final List<dynamic> headersRow = rows[0];
+      int iHeader = 0;
+      if (_isTitleLine(rows[iHeader])) {
+        // This is a title row. Skip it.
+        skippedCount++;
+        iHeader = 1;
+      }
+      final List<dynamic> headersRow = rows[iHeader];
       List<String> headers = headersRow.map((e) => e.toString()).toList();
       List<String> fields = [];
 
@@ -308,7 +331,12 @@ class Student {
       final fieldCount = fields.length;
       NLog.log(fields);
 
-      for (var i = 1; i < lineCount; i++) {
+      for (var i = iHeader + 1; i < lineCount; i++) {
+        if (_isBlankLine(rows[i])) {
+          // This is a title row. Skip it.
+          skippedCount++;
+          continue;
+        }
         final List<dynamic> values = rows[i];
         final valueCount = values.length;
         if (fieldCount == valueCount) {
@@ -324,6 +352,7 @@ class Student {
           }
           smap.add(data);
         } else {
+          // ignore: use_build_context_synchronously
           NAlert.alert(
               context, "Error Loading CSV", "Error $fieldCount != $valueCount");
           return [];
@@ -335,7 +364,7 @@ class Student {
       }
     }
 
-    NLog.log("Loaded ${students.length} rows");
+    NLog.log("Loaded ${students.length} rows. Skipped $skippedCount rows.");
 
     statusMap = await readStudentMap();
     statusMap.forEach((sid, status) {
