@@ -110,6 +110,10 @@ class _NoolHomeState extends State<NoolHome> {
     super.dispose();
   }
 
+  onSyncData() {
+    Student.syncData(context);
+  }
+
   Future<void> onReloadData({bool silent = false}) async {
     if (!silent) {
       setState(() => loading = true);
@@ -348,7 +352,8 @@ class _NoolHomeState extends State<NoolHome> {
         NPDF.print(displayStudents);
         break;
       case 4:
-        NAlert.alert(context, "Sync", "TODO");
+        onSyncData();
+        //NAlert.alert(context, "Sync", "TODO");
         break;
       default:
         break;

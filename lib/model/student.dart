@@ -8,6 +8,7 @@ import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:nool/data/student.dart';
 import 'package:nool/utils/alert.dart';
+import 'package:nool/utils/api.dart';
 import 'package:nool/utils/json.dart';
 import 'package:nool/utils/log.dart';
 import 'package:collection/collection.dart';
@@ -421,5 +422,20 @@ class Student {
       }
     }
     return m;
+  }
+
+  //
+  // Sync Data
+  //
+  static syncData(BuildContext context) async {
+    bool has = await API.hasInternetConnection();
+    if (!has) {
+      // ignore: use_build_context_synchronously
+      NAlert.alert(context, "Sync", "There is no internet connection");
+    } else {
+      NLog.log("TODO");
+    }
+
+    // Read map data
   }
 }
