@@ -8,6 +8,7 @@ import 'package:nool/model/nool_status.dart';
 import 'package:nool/model/student.dart';
 import 'package:nool/student_card.dart';
 import 'package:nool/student_detail.dart';
+import 'package:nool/sync_data.dart';
 import 'package:nool/utils/alert.dart';
 import 'package:nool/utils/excel.dart';
 import 'package:nool/utils/log.dart';
@@ -111,7 +112,8 @@ class _NoolHomeState extends State<NoolHome> {
   }
 
   onSyncData() {
-    Student.syncData(context);
+    Navigator.push(context,
+        MaterialPageRoute(builder: (BuildContext context) => const SyncData()));
   }
 
   Future<void> onReloadData({bool silent = false}) async {
