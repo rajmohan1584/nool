@@ -17,6 +17,8 @@ class SyncData extends StatefulWidget {
 
 class _SyncDataState extends State<SyncData> {
   bool hasConnection = false;
+  Map<String, dynamic> statusMap = {};
+  Map<String, dynamic> statusMapDB = {};
 
   @override
   void initState() {
@@ -34,6 +36,12 @@ class _SyncDataState extends State<SyncData> {
       // ignore: use_build_context_synchronously
       NAlert.alert(context, "Sync", "There is no internet connection");
     } else {
+      final Map<String, dynamic> m = await Student.readStudentMap();
+      final Map<String, dynamic> mDB = await Student.readStudentMapFromDB();
+      setState(() {
+        statusMap = m;
+        statusMapDB = mDB;
+      });
       NLog.log("TODO");
     }
   }
@@ -46,30 +54,75 @@ class _SyncDataState extends State<SyncData> {
   }
 
   Widget buildBody() {
-    String msg;
+    String networkMsg;
     String img = "cloud_connected.png";
     if (hasConnection) {
-      msg = "Network Connection Exists";
+      networkMsg = "Network Connection Exists";
     } else {
-      msg = "No Network Connection Found";
+      networkMsg = "No Network Connection Found";
       img = "cloud_error.png";
     }
+
+    if (!hasConnection) {
+      return Column(children: [
+        Container(
+            margin: const EdgeInsets.all(30),
+            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+              IMAGES.assetImage(img),
+              const SizedBox(width: 20),
+              Text(networkMsg)
+            ])),
+        const SizedBox(
+          height: 20,
+        ),
+        CupertinoButton.filled(
+            child: const Text("Close"),
+            onPressed: () {
+              Navigator.pop(context);
+            })
+      ]);
+    }
+
+    final count = statusMap.length;
+    String statusMsg = "There are $count Status Updates in your local";
+
+    int deliveredCount = 0;
+    int partialCount = 0;
+
+    statusMap.forEach((key, value) {
+      if (value == "delivered") {
+        deliveredCount++;
+      } else if (value == "partial") {
+        partialCount++;
+      }
+    });
+
     return Column(children: [
       Container(
           margin: const EdgeInsets.all(30),
           child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             IMAGES.assetImage(img),
             const SizedBox(width: 20),
-            Text(msg)
+            Text(networkMsg)
           ])),
       const SizedBox(
         height: 20,
       ),
-      CupertinoButton.filled(
-          child: const Text("Close"),
-          onPressed: () {
-            Navigator.pop(context);
-          })
+      const SizedBox(height: 30),
+      Text(statusMsg),
+      Container(
+          margin: const EdgeInsets.all(20),
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            NoolStatus.statusIcon("delivered"),
+            const SizedBox(width: 20),
+            Text("delivered $deliveredCount")
+          ])),
+      Container(
+          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        NoolStatus.statusIcon("partial"),
+        const SizedBox(width: 20),
+        Text("partial $partialCount")
+      ])),
     ]);
   }
 }

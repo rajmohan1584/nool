@@ -1,5 +1,5 @@
 //import 'package:cloud_firestore/cloud_firestore.dart';
-//import 'package:firedart/firedart.dart';
+import 'package:firedart/firedart.dart';
 import 'dart:convert';
 import 'dart:io';
 
@@ -421,6 +421,44 @@ class Student {
         NLog.log(e.toString());
       }
     }
+    return m;
+  }
+
+  static Future<Map<String, dynamic>> readStudentMapFromDB() async {
+    //
+    // Read student_status collection
+    //
+    Map<String, dynamic> m = {};
+    final coll = Firestore.instance.collection('student_status_w');
+    var query = coll.orderBy("studentID").limit(100);
+
+    bool done = false;
+    while (!done) {
+      final docs = await query.get();
+      NLog.log("Query returned ${docs.length}");
+
+      for (var doc in docs) {
+        final String studentID = doc["studentID"];
+        final status = JSON.parseString(doc, "status");
+        if (status == "delivered" || status == "partial") {
+          m[studentID] = status;
+        } else {
+          NLog.log("Error");
+          NLog.log(doc);
+        }
+      }
+
+      if (docs.length < 100) {
+        done = true;
+      } else {
+        final String lastStudentID = docs[docs.length - 1]["studentID"];
+        query = coll
+            .orderBy("studentID")
+            .where("studentID", isGreaterThan: lastStudentID)
+            .limit(100);
+      }
+    }
+
     return m;
   }
 

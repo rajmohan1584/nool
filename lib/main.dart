@@ -1,9 +1,9 @@
 //import 'package:firebase_core/firebase_core.dart';
+//import 'package:nool/firebase_options.dart';
 import 'dart:io';
 
-//import 'package:firedart/firedart.dart';
+import 'package:firedart/firedart.dart';
 import 'package:flutter/material.dart';
-//import 'package:nool/firebase_options.dart';
 import 'package:nool/home.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -36,7 +36,7 @@ void main() async {
     });
   }
 
-  //Firestore.initialize(projectId);
+  Firestore.initialize(projectId);
   runApp(const MyApp());
 }
 
