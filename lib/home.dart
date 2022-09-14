@@ -111,11 +111,6 @@ class _NoolHomeState extends State<NoolHome> {
     super.dispose();
   }
 
-  onSyncData() {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (BuildContext context) => const SyncData()));
-  }
-
   Future<void> onReloadData({bool silent = false}) async {
     if (!silent) {
       setState(() => loading = true);
@@ -302,15 +297,15 @@ class _NoolHomeState extends State<NoolHome> {
     );
   }
 
-  void setStudentStatus(String sid, String status) {
+  Future<void> setStudentStatus(String sid, String status) async {
     final Student? s = students.firstWhereOrNull(
       (s) => s.studentID == sid,
     );
     if (s != null) {
       setState(() {
         s.status = status;
-        Student.saveStudentStatus(s, status);
       });
+      await Student.saveStudentStatus(s, status);
       onFilterData(groupValue, searchInputCtlr.text);
     }
   }
@@ -354,7 +349,12 @@ class _NoolHomeState extends State<NoolHome> {
         NPDF.print(displayStudents);
         break;
       case 4:
-        onSyncData();
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (BuildContext context) => SyncData(
+                    uploadCallback: Student.syncStudentStatusDB,
+                    downloadCallback: setStudentStatus)));
         //NAlert.alert(context, "Sync", "TODO");
         break;
       default:

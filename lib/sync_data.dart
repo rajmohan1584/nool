@@ -9,7 +9,11 @@ import 'package:nool/utils/images.dart';
 import 'package:nool/utils/log.dart';
 
 class SyncData extends StatefulWidget {
-  const SyncData({Key? key}) : super(key: key);
+  const SyncData(
+      {Key? key, required this.uploadCallback, required this.downloadCallback})
+      : super(key: key);
+  final Future<void> Function(String, String) uploadCallback;
+  final Future<void> Function(String, String) downloadCallback;
 
   @override
   State<SyncData> createState() => _SyncDataState();
@@ -17,6 +21,8 @@ class SyncData extends StatefulWidget {
 
 class _SyncDataState extends State<SyncData> {
   bool hasConnection = false;
+  bool uploadNeeded = false;
+  bool downloadNeeded = false;
   Map<String, dynamic> statusMap = {};
   Map<String, dynamic> statusMapDB = {};
 
@@ -38,12 +44,88 @@ class _SyncDataState extends State<SyncData> {
     } else {
       final Map<String, dynamic> m = await Student.readStudentMap();
       final Map<String, dynamic> mDB = await Student.readStudentMapFromDB();
+
       setState(() {
         statusMap = m;
         statusMapDB = mDB;
+        uploadNeeded = cloudNeedsUpload(mDB, m);
+        downloadNeeded = localNeedsDownload(m, mDB);
       });
-      NLog.log("TODO");
     }
+  }
+
+  bool cloudNeedsUpload(Map<String, dynamic> mDB, Map<String, dynamic> m) {
+    // Does cloud need updating.
+    bool bDirty = false;
+    m.forEach((key, value) {
+      if (value == "delivered" || value == "partial") {
+        final dbValue = mDB[key];
+        if (value != dbValue) {
+          bDirty = true;
+          NLog.log("Upload Needed $key = $value");
+        } else {
+          //NLog.log("$key ${mDB[key]} = ${m[key]}");
+        }
+      } else {
+        NLog.log("Warning in local value - $key ${mDB[key]} = ${m[key]}");
+      }
+    });
+    return bDirty;
+  }
+
+  bool localNeedsDownload(Map<String, dynamic> m, Map<String, dynamic> mDB) {
+    // Does local need updating.
+    bool bDirty = false;
+    mDB.forEach((key, value) {
+      if (value == "delivered" || value == "partial") {
+        final dbValue = m[key];
+        if (value != dbValue) {
+          bDirty = true;
+          NLog.log("Download Needed $key = $value");
+        } else {
+          //NLog.log("$key ${mDB[key]} = ${m[key]}");
+        }
+      } else {
+        NLog.log("Warning in DB value - $key ${mDB[key]} = ${m[key]}");
+      }
+    });
+    return bDirty;
+  }
+
+  Future<void> uploadLocalToCloud() async {
+    for (var key in statusMap.keys) {
+      final value = statusMap[key];
+      final dbValue = statusMapDB[key];
+      if (value == "delivered" || value == "partial") {
+        if (value != dbValue) {
+          NLog.log("Calling Upload Callback $key = $value");
+          await widget.uploadCallback(key, value);
+        } else {
+          //NLog.log("$key value = dbValue");
+        }
+      } else {
+        NLog.log("Warning in local value - $key=$value");
+      }
+    }
+    onReload();
+  }
+
+  Future<void> downloadFromCloud() async {
+    for (var key in statusMapDB.keys) {
+      final dbValue = statusMapDB[key];
+      final value = statusMap[key];
+      if (dbValue == "delivered" || dbValue == "partial") {
+        if (value != dbValue) {
+          NLog.log("Calling Download Callback $key = $value");
+          await widget.downloadCallback(key, dbValue);
+        } else {
+          //NLog.log("$key value = dbValue");
+        }
+      } else {
+        NLog.log("Warning in local value - $key=$value");
+      }
+    }
+    onReload();
   }
 
   @override
@@ -51,6 +133,38 @@ class _SyncDataState extends State<SyncData> {
     return Scaffold(
         appBar: AppBar(title: const Text('Sync to DB')),
         body: SafeArea(child: buildBody()));
+  }
+
+  genStatusInfo(Map<String, dynamic> m, children) {
+    int deliveredCount = 0;
+    int partialCount = 0;
+
+    m.forEach((key, value) {
+      if (value == "delivered") {
+        deliveredCount++;
+      } else if (value == "partial") {
+        partialCount++;
+      }
+    });
+
+    children.add(const SizedBox(height: 30));
+    children.add(Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          NoolStatus.statusIcon("delivered"),
+          const SizedBox(width: 10),
+          Text(" $deliveredCount  delivered")
+        ]));
+    children.add(Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          NoolStatus.statusIcon("partial"),
+          const SizedBox(width: 10),
+          Text("  $partialCount  partial    ")
+        ]));
+    children.add(const SizedBox(height: 30));
   }
 
   Widget buildBody() {
@@ -63,66 +177,75 @@ class _SyncDataState extends State<SyncData> {
       img = "cloud_error.png";
     }
 
-    if (!hasConnection) {
-      return Column(children: [
-        Container(
-            margin: const EdgeInsets.all(30),
-            child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              IMAGES.assetImage(img),
-              const SizedBox(width: 20),
-              Text(networkMsg)
-            ])),
-        const SizedBox(
-          height: 20,
-        ),
-        CupertinoButton.filled(
-            child: const Text("Close"),
-            onPressed: () {
-              Navigator.pop(context);
-            })
-      ]);
-    }
-
     final count = statusMap.length;
     String statusMsg = "There are $count Status Updates in your local";
 
-    int deliveredCount = 0;
-    int partialCount = 0;
-
-    statusMap.forEach((key, value) {
-      if (value == "delivered") {
-        deliveredCount++;
-      } else if (value == "partial") {
-        partialCount++;
-      }
-    });
-
-    return Column(children: [
-      Container(
-          margin: const EdgeInsets.all(30),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            IMAGES.assetImage(img),
-            const SizedBox(width: 20),
-            Text(networkMsg)
-          ])),
-      const SizedBox(
-        height: 20,
-      ),
+    final columnChildren = <Widget>[
       const SizedBox(height: 30),
-      Text(statusMsg),
-      Container(
-          margin: const EdgeInsets.all(20),
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-            NoolStatus.statusIcon("delivered"),
-            const SizedBox(width: 20),
-            Text("delivered $deliveredCount")
-          ])),
-      Container(
-          child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-        NoolStatus.statusIcon("partial"),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        IMAGES.assetImage(img),
         const SizedBox(width: 20),
-        Text("partial $partialCount")
-      ])),
-    ]);
+        Text(networkMsg)
+      ]),
+      const SizedBox(height: 20),
+      const Divider(color: Colors.blue),
+      const SizedBox(height: 20),
+      Text(statusMsg),
+    ];
+
+    genStatusInfo(statusMap, columnChildren);
+
+    if (!hasConnection) {
+      columnChildren.add(const Divider(color: Colors.blue));
+      columnChildren.add(CupertinoButton.filled(
+          child: const Text("Close"),
+          onPressed: () {
+            Navigator.pop(context);
+          }));
+      return Column(children: columnChildren);
+    }
+
+    if (uploadNeeded) {
+      // Need to upload.
+      columnChildren.add(CupertinoButton.filled(
+          child: const Text("Upload"),
+          onPressed: () async {
+            await uploadLocalToCloud();
+          }));
+    } else {
+      columnChildren
+          .add(const Text("All local data is available in the Cloud."));
+      columnChildren.add(const Text("No Upload required."));
+    }
+
+    columnChildren.add(const Divider(color: Colors.blue));
+
+    final countDB = statusMapDB.length;
+    String statusMsgDB = "There are $countDB Status Updates the Cloud";
+
+    columnChildren.add(const SizedBox(height: 20));
+    columnChildren.add(Text(statusMsgDB));
+    genStatusInfo(statusMapDB, columnChildren);
+
+    if (downloadNeeded) {
+      // Need to download.
+      columnChildren.add(CupertinoButton.filled(
+          child: const Text("Download"),
+          onPressed: () async {
+            await downloadFromCloud();
+          }));
+    } else {
+      columnChildren.add(const Text("All Cloud data is available in Local."));
+      columnChildren.add(const Text("No Download required."));
+      columnChildren.add(const Divider(color: Colors.blue));
+      columnChildren.add(const SizedBox(height: 20));
+      columnChildren.add(CupertinoButton.filled(
+          child: const Text("Close"),
+          onPressed: () {
+            Navigator.pop(context);
+          }));
+    }
+
+    return Column(children: columnChildren);
   }
 }

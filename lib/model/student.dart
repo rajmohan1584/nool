@@ -380,7 +380,7 @@ class Student {
     return students;
   }
 
-  static void saveStudentStatus(Student s, String status) async {
+  static Future<void> saveStudentStatus(Student s, String status) async {
     if (status.isEmpty) status = "pending";
 
     final String studentID = s.studentID;
@@ -391,6 +391,52 @@ class Student {
     NLog.log(statusMap);
 
     writeStudentMap();
+  }
+
+  static Future<void> saveStudentStatusDB(Student s, String status) async {
+    if (status.isEmpty) status = "pending";
+
+    final String studentID = s.studentID;
+    final CollectionReference coll =
+        Firestore.instance.collection('student_status_w');
+    final QueryReference query = coll.where('studentID', isEqualTo: studentID);
+    final List<Document> docs = await query.get();
+
+    var now = DateTime.now();
+
+    if (docs.isEmpty) {
+      NLog.log('Adding student_status_w $studentID - $status');
+      await coll
+          .add({"studentID": studentID, "status": status, "updated": now});
+    } else {
+      final Document doc = docs[0];
+      NLog.log('Adding student_status_w ${doc.id} $studentID - $status');
+      await coll.document(doc.id).update({"status": status, "updated": now});
+    }
+
+    s.status = status;
+  }
+
+  static Future<void> syncStudentStatusDB(
+      String studentID, String status) async {
+    if (status.isEmpty) status = "pending";
+
+    final CollectionReference coll =
+        Firestore.instance.collection('student_status_w');
+    final QueryReference query = coll.where('studentID', isEqualTo: studentID);
+    final List<Document> docs = await query.get();
+
+    var now = DateTime.now();
+
+    if (docs.isEmpty) {
+      NLog.log('DB Adding student_status_w $studentID - $status');
+      await coll
+          .add({"studentID": studentID, "status": status, "updated": now});
+    } else {
+      final Document doc = docs[0];
+      NLog.log('DB Updating student_status_w ${doc.id} $studentID - $status');
+      await coll.document(doc.id).update({"status": status, "updated": now});
+    }
   }
 
   static void writeStudentMap() async {

@@ -8,7 +8,7 @@ class StudentDetail extends StatefulWidget {
   const StudentDetail({Key? key, required this.student, required this.callback})
       : super(key: key);
   final Student student;
-  final void Function(String, String) callback;
+  final Future<void> Function(String, String) callback;
 
   @override
   State<StudentDetail> createState() => _StudentDetailState();
@@ -38,11 +38,11 @@ class _StudentDetailState extends State<StudentDetail> {
       children.add(Center(child: Text(nstat.msg)));
       children.add(CupertinoSwitch(
         value: nstat.name == status,
-        onChanged: (value) {
+        onChanged: (value) async {
           setState(() {
             status = nstat.name;
-            widget.callback(widget.student.studentID, nstat.name);
           });
+          await widget.callback(widget.student.studentID, nstat.name);
         },
       ));
     }
