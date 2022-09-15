@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:nool/model/nool_status.dart';
 import 'package:nool/model/student.dart';
-import 'package:nool/student_card.dart';
+//import 'package:nool/student_card.dart';
 import 'package:nool/utils/alert.dart';
 import 'package:nool/utils/api.dart';
 import 'package:nool/utils/images.dart';
