@@ -130,8 +130,10 @@ class _NoolHomeState extends State<NoolHome> {
 
     setState(() {
       loading = false;
-      NAlert.alert(
-          context, "Load Complete", "Loaded ${students.length} student rows.");
+      if (!silent) {
+        NAlert.alert(context, "Load Complete",
+            "Loaded ${students.length} student rows.");
+      }
     });
   }
 
@@ -354,8 +356,8 @@ class _NoolHomeState extends State<NoolHome> {
                 MaterialPageRoute(
                     builder: (BuildContext context) => const SyncData(
                         uploadCallback: Student.syncStudentStatusDB,
-                        downloadCallback: Student.syncStudentStatus)))
-            .then((value) => onReloadData());
+                        downloadCallback: Student.syncStudentStatusMap)))
+            .then((value) => onReloadData(silent: true));
         //NAlert.alert(context, "Sync", "TODO");
         break;
       default:

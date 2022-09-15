@@ -13,7 +13,7 @@ class SyncData extends StatefulWidget {
       {Key? key, required this.uploadCallback, required this.downloadCallback})
       : super(key: key);
   final Future<void> Function(String, String) uploadCallback;
-  final Future<void> Function(String, String) downloadCallback;
+  final Future<void> Function(Map<String, dynamic>) downloadCallback;
 
   @override
   State<SyncData> createState() => _SyncDataState();
@@ -29,8 +29,8 @@ class _SyncDataState extends State<SyncData> {
   Map<String, dynamic> statusMapDB = {};
 
   @override
-  void initState() async {
-    await onReload();
+  void initState() {
+    onReload();
     super.initState();
   }
 
@@ -66,7 +66,7 @@ class _SyncDataState extends State<SyncData> {
         final dbValue = mDB[key];
         if (value != dbValue) {
           bDirty = true;
-          NLog.log("Upload Needed $key = $value");
+          //NLog.log("Upload Needed $key = $value");
         } else {
           //NLog.log("$key ${mDB[key]} = ${m[key]}");
         }
@@ -85,7 +85,7 @@ class _SyncDataState extends State<SyncData> {
         final dbValue = m[key];
         if (value != dbValue) {
           bDirty = true;
-          NLog.log("Download Needed $key = $value");
+          //NLog.log("Download Needed $key = $value");
         } else {
           //NLog.log("$key ${mDB[key]} = ${m[key]}");
         }
@@ -104,7 +104,7 @@ class _SyncDataState extends State<SyncData> {
       final dbValue = statusMapDB[key];
       if (value == "delivered" || value == "partial") {
         if (value != dbValue) {
-          NLog.log("Calling Upload Callback $key = $value");
+          //NLog.log("Calling Upload Callback $key = $value");
           await widget.uploadCallback(key, value);
         } else {
           //NLog.log("$key value = dbValue");
@@ -122,8 +122,8 @@ class _SyncDataState extends State<SyncData> {
       final value = statusMap[key];
       if (dbValue == "delivered" || dbValue == "partial") {
         if (value != dbValue) {
-          NLog.log("Calling Download Callback $key = $value");
-          await widget.downloadCallback(key, dbValue);
+          //NLog.log("Calling Download Callback $key = $value");
+          statusMap[key] = dbValue;
         } else {
           //NLog.log("$key value = dbValue");
         }
@@ -131,6 +131,7 @@ class _SyncDataState extends State<SyncData> {
         NLog.log("Warning in local value - $key=$value");
       }
     }
+    await widget.downloadCallback(statusMap);
     await onReload();
   }
 

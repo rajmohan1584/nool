@@ -388,9 +388,9 @@ class Student {
 
     s.status = status;
 
-    NLog.log(statusMap);
+    //(statusMap);
 
-    writeStudentMap();
+    await writeStudentMap(statusMap);
   }
 
   static Future<void> saveStudentStatusDB(Student s, String status) async {
@@ -417,12 +417,8 @@ class Student {
     s.status = status;
   }
 
-  static Future<void> syncStudentStatus(String studentID, String status) async {
-    if (status.isEmpty) status = "pending";
-
-    statusMap[studentID] = status;
-
-    writeStudentMap();
+  static Future<void> syncStudentStatusMap(Map<String, dynamic> map) async {
+    await writeStudentMap(map);
   }
 
   static Future<void> syncStudentStatusDB(
@@ -447,18 +443,18 @@ class Student {
     }
   }
 
-  static void writeStudentMap() async {
+  static Future<void> writeStudentMap(Map<String, dynamic> map) async {
     final directory = await getApplicationDocumentsDirectory();
     String filePath = "${directory.path}/nool_status.map";
     File file = File(filePath);
     String s = '{';
     String delim = '';
-    statusMap.forEach((key, value) {
+    map.forEach((key, value) {
       s += '$delim"$key":"$value"';
       delim = ',';
     });
     s += '}';
-    file.writeAsString(s);
+    await file.writeAsString(s);
   }
 
   static Future<Map<String, dynamic>> readStudentMap() async {
