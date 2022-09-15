@@ -23,12 +23,14 @@ class _SyncDataState extends State<SyncData> {
   bool hasConnection = false;
   bool uploadNeeded = false;
   bool downloadNeeded = false;
+  bool uploading = false;
+  bool downloading = false;
   Map<String, dynamic> statusMap = {};
   Map<String, dynamic> statusMapDB = {};
 
   @override
-  void initState() {
-    onReload();
+  void initState() async {
+    await onReload();
     super.initState();
   }
 
@@ -50,6 +52,8 @@ class _SyncDataState extends State<SyncData> {
         statusMapDB = mDB;
         uploadNeeded = cloudNeedsUpload(mDB, m);
         downloadNeeded = localNeedsDownload(m, mDB);
+        uploading = false;
+        downloading = false;
       });
     }
   }
@@ -93,6 +97,8 @@ class _SyncDataState extends State<SyncData> {
   }
 
   Future<void> uploadLocalToCloud() async {
+    setState(() => uploading = true);
+
     for (var key in statusMap.keys) {
       final value = statusMap[key];
       final dbValue = statusMapDB[key];
@@ -107,7 +113,7 @@ class _SyncDataState extends State<SyncData> {
         NLog.log("Warning in local value - $key=$value");
       }
     }
-    onReload();
+    await onReload();
   }
 
   Future<void> downloadFromCloud() async {
@@ -125,7 +131,7 @@ class _SyncDataState extends State<SyncData> {
         NLog.log("Warning in local value - $key=$value");
       }
     }
-    onReload();
+    await onReload();
   }
 
   @override
@@ -207,11 +213,20 @@ class _SyncDataState extends State<SyncData> {
 
     if (uploadNeeded) {
       // Need to upload.
-      columnChildren.add(CupertinoButton.filled(
-          child: const Text("Upload"),
-          onPressed: () async {
-            await uploadLocalToCloud();
-          }));
+      if (downloading || uploading) {
+        columnChildren.add(CupertinoButton.filled(
+            onPressed: () {},
+            child: const CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 1.5,
+            )));
+      } else {
+        columnChildren.add(CupertinoButton.filled(
+            child: const Text("Upload"),
+            onPressed: () async {
+              await uploadLocalToCloud();
+            }));
+      }
     } else {
       columnChildren
           .add(const Text("All local data is available in the Cloud."));
@@ -229,11 +244,21 @@ class _SyncDataState extends State<SyncData> {
 
     if (downloadNeeded) {
       // Need to download.
-      columnChildren.add(CupertinoButton.filled(
-          child: const Text("Download"),
-          onPressed: () async {
-            await downloadFromCloud();
-          }));
+      if (downloading || uploading) {
+        columnChildren.add(CupertinoButton.filled(
+            onPressed: () {},
+            child: const CircularProgressIndicator(
+              color: Colors.white,
+              strokeWidth: 1.5,
+            )));
+      } else {
+        columnChildren.add(CupertinoButton.filled(
+            child: const Text("Download"),
+            onPressed: () async {
+              await downloadFromCloud();
+            }));
+      }
+      columnChildren.add(const Divider(color: Colors.blue));
     } else {
       columnChildren.add(const Text("All Cloud data is available in Local."));
       columnChildren.add(const Text("No Download required."));

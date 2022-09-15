@@ -350,11 +350,12 @@ class _NoolHomeState extends State<NoolHome> {
         break;
       case 4:
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => SyncData(
-                    uploadCallback: Student.syncStudentStatusDB,
-                    downloadCallback: setStudentStatus)));
+                context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => const SyncData(
+                        uploadCallback: Student.syncStudentStatusDB,
+                        downloadCallback: Student.syncStudentStatus)))
+            .then((value) => onReloadData());
         //NAlert.alert(context, "Sync", "TODO");
         break;
       default:
@@ -370,7 +371,7 @@ class _NoolHomeState extends State<NoolHome> {
             fontWeight: FontWeight.bold,
             fontFamily: "Catamaran-VariableFont_wght",
             color: Colors.white));
-    final ver = TEXT.nameText('2.1', fontSize: 10);
+    final ver = TEXT.nameText('2.2', fontSize: 10);
 
     final title = Row(
       children: [nool, const SizedBox(width: 10), ver],

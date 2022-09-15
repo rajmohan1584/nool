@@ -171,7 +171,7 @@ class Student {
     //
     // Read student_status collection
     //
-    coll = Firestore.instance.collection('student_status_w');
+    coll = Firestore.instance.collection('student_status');
     query = coll.orderBy("studentID").limit(100);
 
     done = false;
@@ -212,19 +212,19 @@ class Student {
 
     final String studentID = s.studentID;
     final CollectionReference coll =
-        Firestore.instance.collection('student_status_w');
+        Firestore.instance.collection('student_status');
     final QueryReference query = coll.where('studentID', isEqualTo: studentID);
     final List<Document> docs = await query.get();
 
     var now = DateTime.now();
 
     if (docs.isEmpty) {
-      NLog.log('Adding student_status_w $studentID - $status');
+      NLog.log('Adding student_status $studentID - $status');
       await coll
           .add({"studentID": studentID, "status": status, "updated": now});
     } else {
       final Document doc = docs[0];
-      NLog.log('Adding student_status_w ${doc.id} $studentID - $status');
+      NLog.log('Adding student_status ${doc.id} $studentID - $status');
       await coll.document(doc.id).update({"status": status, "updated": now});
     }
 
@@ -398,23 +398,31 @@ class Student {
 
     final String studentID = s.studentID;
     final CollectionReference coll =
-        Firestore.instance.collection('student_status_w');
+        Firestore.instance.collection('student_status');
     final QueryReference query = coll.where('studentID', isEqualTo: studentID);
     final List<Document> docs = await query.get();
 
     var now = DateTime.now();
 
     if (docs.isEmpty) {
-      NLog.log('Adding student_status_w $studentID - $status');
+      NLog.log('Adding student_status $studentID - $status');
       await coll
           .add({"studentID": studentID, "status": status, "updated": now});
     } else {
       final Document doc = docs[0];
-      NLog.log('Adding student_status_w ${doc.id} $studentID - $status');
+      NLog.log('Adding student_status ${doc.id} $studentID - $status');
       await coll.document(doc.id).update({"status": status, "updated": now});
     }
 
     s.status = status;
+  }
+
+  static Future<void> syncStudentStatus(String studentID, String status) async {
+    if (status.isEmpty) status = "pending";
+
+    statusMap[studentID] = status;
+
+    writeStudentMap();
   }
 
   static Future<void> syncStudentStatusDB(
@@ -422,19 +430,19 @@ class Student {
     if (status.isEmpty) status = "pending";
 
     final CollectionReference coll =
-        Firestore.instance.collection('student_status_w');
+        Firestore.instance.collection('student_status');
     final QueryReference query = coll.where('studentID', isEqualTo: studentID);
     final List<Document> docs = await query.get();
 
     var now = DateTime.now();
 
     if (docs.isEmpty) {
-      NLog.log('DB Adding student_status_w $studentID - $status');
+      NLog.log('DB Adding student_status $studentID - $status');
       await coll
           .add({"studentID": studentID, "status": status, "updated": now});
     } else {
       final Document doc = docs[0];
-      NLog.log('DB Updating student_status_w ${doc.id} $studentID - $status');
+      NLog.log('DB Updating student_status ${doc.id} $studentID - $status');
       await coll.document(doc.id).update({"status": status, "updated": now});
     }
   }
@@ -475,7 +483,7 @@ class Student {
     // Read student_status collection
     //
     Map<String, dynamic> m = {};
-    final coll = Firestore.instance.collection('student_status_w');
+    final coll = Firestore.instance.collection('student_status');
     var query = coll.orderBy("studentID").limit(100);
 
     bool done = false;
